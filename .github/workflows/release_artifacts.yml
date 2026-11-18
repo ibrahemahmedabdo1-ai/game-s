@@ -1,0 +1,54 @@
+name: Release on tag
+# Tag format: <game_dir>-v<version>, e.g. color_reactor-v1.0.0
+on:
+  push:
+    tags: ['*-v*']
+permissions:
+  contents: write
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    env:
+      ANDROID_KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+      ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+      ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+      ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+      - name: Accept Android licenses
+        run: yes | flutter doctor --android-licenses || true
+      - name: Resolve game and check version matches pubspec
+        run: |
+          GAME="${GITHUB_REF_NAME%-v*}"; VER="${GITHUB_REF_NAME##*-v}"
+          echo "GAME=$GAME" >> "$GITHUB_ENV"
+          PUB=$(grep '^version:' apps/$GAME/pubspec.yaml | sed 's/version: *//; s/+.*//')
+          [ "$PUB" = "$VER" ] || { echo "Tag version $VER != pubspec $PUB"; exit 1; }
+          KEY=$(echo "$GAME" | tr a-z A-Z)
+          echo "KEY=$KEY" >> "$GITHUB_ENV"
+      - name: Load per-game AdMob IDs
+        env:
+          ALL_SECRETS: ${{ toJSON(secrets) }}
+        run: |
+          for n in APP_ID BANNER_ID INTERSTITIAL_ID REWARDED_ID; do
+            v=$(echo "$ALL_SECRETS" | jq -r --arg k "ADMOB_${n}_$KEY" '.[$k] // empty')
+            [ -n "$v" ] && { echo "::add-mask::$v"; echo "ADMOB_$n=$v" >> "$GITHUB_ENV"; }
+          done
+      - run: scripts/ci_build.sh "$GAME" apk-debug
+      - run: scripts/ci_build.sh "$GAME" apk-release
+      - run: scripts/ci_build.sh "$GAME" aab
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ${{ github.ref_name }}
+          path: release/${{ env.GAME }}
+      - uses: softprops/action-gh-release@v2
+        with:
+          files: release/${{ env.GAME }}/*
+          generate_release_notes: true

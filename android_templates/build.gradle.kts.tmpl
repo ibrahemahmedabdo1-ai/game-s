@@ -1,0 +1,64 @@
+import java.io.FileInputStream
+import java.util.Properties
+
+plugins {
+    id("com.android.application")
+    id("kotlin-android")
+    id("dev.flutter.flutter-gradle-plugin")
+}
+
+// Signing: only configured when android/key.properties exists (created by CI
+// from GitHub Secrets, or by you locally from key.properties.example).
+val keystoreProps = Properties()
+val keystoreFile = rootProject.file("key.properties")
+val hasSigning = keystoreFile.exists()
+if (hasSigning) keystoreProps.load(FileInputStream(keystoreFile))
+
+android {
+    namespace = "__APP_ID__"
+    compileSdk = 36
+    ndkVersion = flutter.ndkVersion
+
+    compileOptions {
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
+    }
+    kotlinOptions { jvmTarget = "17" }
+
+    defaultConfig {
+        applicationId = "__APP_ID__"
+        minSdk = 23
+        targetSdk = 36
+        versionCode = flutter.versionCode
+        versionName = flutter.versionName
+        // Real AdMob app ID is supplied via the ADMOB_APP_ID environment
+        // variable. Falls back to Google's public SAMPLE id; Dart code keeps
+        // ads disabled in production builds that lack real unit IDs.
+        manifestPlaceholders["admobAppId"] =
+            System.getenv("ADMOB_APP_ID")?.takeIf { it.startsWith("ca-app-pub-") }
+                ?: "ca-app-pub-3940256099942544~3347511713"
+    }
+
+    signingConfigs {
+        if (hasSigning) {
+            create("release") {
+                keyAlias = keystoreProps["keyAlias"] as String
+                keyPassword = keystoreProps["keyPassword"] as String
+                storeFile = file(keystoreProps["storeFile"] as String)
+                storePassword = keystoreProps["storePassword"] as String
+            }
+        }
+    }
+
+    buildTypes {
+        release {
+            // Never falls back to the debug key.
+            signingConfig = if (hasSigning) signingConfigs.getByName("release") else null
+            isMinifyEnabled = true
+            isShrinkResources = true
+            proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
+        }
+    }
+}
+
+flutter { source = "../.." }

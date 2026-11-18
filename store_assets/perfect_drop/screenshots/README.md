@@ -1,0 +1,1 @@
+Play requires real screenshots of the running game (min 2 phone screenshots, 9:16 or 16:9, 320-3840 px). After your first successful debug APK: run it, capture menu / gameplay / level select / result screen (English and Arabic) with `adb exec-out screencap -p > shot1.png`, and place them here. Do not use mock-ups: Play policy requires screenshots to show the actual app.

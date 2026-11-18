@@ -1,0 +1,14 @@
+name: shared_game_core
+description: Helpers shared by all games (scoring, daily seeds, achievements).
+version: 1.0.0
+publish_to: none
+environment:
+  sdk: ">=3.5.0 <4.0.0"
+dependencies:
+  shared_storage:
+    path: ../shared_storage
+  flutter:
+    sdk: flutter
+dev_dependencies:
+  flutter_test:
+    sdk: flutter

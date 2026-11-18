@@ -1,0 +1,25 @@
+name: shared_ui
+description: Shared screens and widgets (splash, menu, settings, level select, achievements, tutorial).
+version: 1.0.0
+publish_to: none
+environment:
+  sdk: ">=3.5.0 <4.0.0"
+dependencies:
+  flutter:
+    sdk: flutter
+  flame: ^1.21.0
+  flutter_localizations:
+    sdk: flutter
+  shared_storage:
+    path: ../shared_storage
+  shared_localization:
+    path: ../shared_localization
+  shared_ads:
+    path: ../shared_ads
+  shared_audio:
+    path: ../shared_audio
+  shared_game_core:
+    path: ../shared_game_core
+dev_dependencies:
+  flutter_test:
+    sdk: flutter

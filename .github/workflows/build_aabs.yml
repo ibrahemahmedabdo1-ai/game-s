@@ -1,0 +1,50 @@
+name: Build AABs
+on:
+  workflow_dispatch:
+jobs:
+  aab:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        game: [color_reactor, gravity_switch, shape_eater, perfect_drop, color_merge_lab, mini_puzzle_arcade]
+        include:
+          - game: color_reactor
+            key: COLOR_REACTOR
+          - game: gravity_switch
+            key: GRAVITY_SWITCH
+          - game: shape_eater
+            key: SHAPE_EATER
+          - game: perfect_drop
+            key: PERFECT_DROP
+          - game: color_merge_lab
+            key: COLOR_MERGE_LAB
+          - game: mini_puzzle_arcade
+            key: MINI_PUZZLE_ARCADE
+    env:
+      ANDROID_KEYSTORE_BASE64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+      ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+      ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+      ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
+      ADMOB_APP_ID: ${{ secrets[format('ADMOB_APP_ID_{0}', matrix.key)] }}
+      ADMOB_BANNER_ID: ${{ secrets[format('ADMOB_BANNER_ID_{0}', matrix.key)] }}
+      ADMOB_INTERSTITIAL_ID: ${{ secrets[format('ADMOB_INTERSTITIAL_ID_{0}', matrix.key)] }}
+      ADMOB_REWARDED_ID: ${{ secrets[format('ADMOB_REWARDED_ID_{0}', matrix.key)] }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+      - name: Accept Android licenses
+        run: yes | flutter doctor --android-licenses || true
+      - name: Build AAB (UNSIGNED if no secrets; file name says so)
+        run: scripts/ci_build.sh ${{ matrix.game }} aab
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.game }}-aab
+          path: release/${{ matrix.game }}

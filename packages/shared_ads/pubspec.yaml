@@ -1,0 +1,13 @@
+name: shared_ads
+description: Centralized AdMob monetization with UMP consent and ethical frequency limits.
+version: 1.0.0
+publish_to: none
+environment:
+  sdk: ">=3.5.0 <4.0.0"
+dependencies:
+  flutter:
+    sdk: flutter
+  google_mobile_ads: ^5.3.0
+dev_dependencies:
+  flutter_test:
+    sdk: flutter

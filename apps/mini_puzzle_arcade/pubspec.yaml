@@ -1,0 +1,30 @@
+name: minipuzzlearcade
+description: Mini Puzzle Arcade
+publish_to: none
+version: 1.0.0+1
+environment:
+  sdk: ">=3.5.0 <4.0.0"
+dependencies:
+  flutter:
+    sdk: flutter
+  flutter_localizations:
+    sdk: flutter
+  shared_ui:
+    path: ../../packages/shared_ui
+  colorreactor:
+    path: ../color_reactor
+  gravityswitch:
+    path: ../gravity_switch
+  shapeeater:
+    path: ../shape_eater
+  perfectdrop:
+    path: ../perfect_drop
+  colormergelab:
+    path: ../color_merge_lab
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^5.0.0
+  shared_preferences: ^2.3.0
+flutter:
+  uses-material-design: true

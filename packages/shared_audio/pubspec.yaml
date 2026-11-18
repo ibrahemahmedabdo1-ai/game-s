@@ -1,0 +1,16 @@
+name: shared_audio
+description: Sound effects, looping music and haptics with user toggles.
+version: 1.0.0
+publish_to: none
+environment:
+  sdk: ">=3.5.0 <4.0.0"
+dependencies:
+  flutter:
+    sdk: flutter
+  audioplayers: ^6.1.0
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+flutter:
+  assets:
+    - assets/sounds/

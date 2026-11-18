@@ -1,0 +1,23 @@
+name: Android CI (analyze + test)
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+  workflow_dispatch:
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+      - name: Accept Android licenses
+        run: yes | flutter doctor --android-licenses || true
+      - name: Analyze and test everything
+        run: scripts/validate_all.sh
